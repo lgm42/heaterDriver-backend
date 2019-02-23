@@ -1,0 +1,37 @@
+{
+    "authors": [
+        {
+            "email": null, 
+            "url": "https://os.mbed.com/users/Phlaphead/", 
+            "maintainer": false, 
+            "name": "Robert Ellis"
+        }
+    ], 
+    "description": "Simple FTP Server built on top of the NetServices TCP/IP stack. Not all functions are implemented yet: * Only connection and directory listing commands are working at the moment. * ...", 
+    "frameworks": [
+        "mbed"
+    ], 
+    "keywords": [
+        "ftp", 
+        "server"
+    ], 
+    "name": "FTPServer", 
+    "platforms": [
+        "atmelsam", 
+        "freescalekinetis", 
+        "maxim32", 
+        "nordicnrf51", 
+        "nordicnrf52", 
+        "nxplpc", 
+        "siliconlabsefm32", 
+        "ststm32", 
+        "teensy", 
+        "wiznet7500"
+    ], 
+    "repository": {
+        "type": "hg", 
+        "url": "https://os.mbed.com/users/Phlaphead/code/FTPServer/"
+    }, 
+    "version": "f5789613b9", 
+    "id": 2325
+}

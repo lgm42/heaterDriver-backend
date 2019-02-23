@@ -1,0 +1,31 @@
+{
+    "name": "esp8266_mdns", 
+    "keywords": [
+        "esp8266", 
+        "mdns", 
+        "zeroconf", 
+        "bonjour", 
+        "avahi"
+    ], 
+    "description": "mDNS queries and responses on esp8266. Or to describe it another way: An mDNS Client or Bonjour Client library for the esp8266.", 
+    "repository": {
+        "type": "git", 
+        "url": "https://github.com/mrdunk/esp8266_mdns.git"
+    }, 
+    "frameworks": [
+        "arduino"
+    ], 
+    "platforms": [
+        "espressif8266"
+    ], 
+    "version": "b7c88fda89", 
+    "authors": [
+        {
+            "email": null, 
+            "url": "https://github.com/mrdunk", 
+            "maintainer": false, 
+            "name": "dunk"
+        }
+    ], 
+    "id": 1091
+}
