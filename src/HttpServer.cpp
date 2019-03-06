@@ -8,9 +8,11 @@
 
 const String HttpServer::RestKeyword = "/rest/";
 const String HttpServer::DataKeyword = "data/";
+const String HttpServer::LearnIrKeyword = "learnIr/";
+const String HttpServer::SendIrKeyword = "sendIr/";
 
-HttpServer::HttpServer(DHT & dht)
-	:	_dht(dht)
+HttpServer::HttpServer(DHT & dht, IRManager & ir)
+	:	_dht(dht), _irManager(ir)
 {
 }
 
@@ -58,13 +60,25 @@ bool HttpServer::handleFileRead(String path)
 							\"next-remote-order\":\"" + "A8BFF435" + "\"}";
 			sendOkAnswerWithParams(answer);
 		}
-		/*
-		else if (instruction.startsWith(StatusKeyword))
+		else if (instruction.startsWith(LearnIrKeyword))
 		{
-			String value = instruction.substring(StatusKeyword.length());
-			Serial.println("sending status");
-			sendOkAnswerWithParams(Status.toJson());
+			int idx = instruction.indexOf('/', LearnIrKeyword.length());
+			String irCodeNumberAsString = instruction.substring(LearnIrKeyword.length(), idx);
+			int irCodeNumber = atoi(irCodeNumberAsString.c_str());
+			Serial.println("learning code" + String(irCodeNumber));
+			_irManager.startToLearnCode(irCodeNumber);
+			sendOk();
 		}
+		else if (instruction.startsWith(SendIrKeyword))
+		{
+			int idx = instruction.indexOf('/', SendIrKeyword.length());
+			String irCodeNumberAsString = instruction.substring(SendIrKeyword.length(), idx);
+			int irCodeNumber = atoi(irCodeNumberAsString.c_str());
+			Serial.println("sending code" + String(irCodeNumber));
+			_irManager.sendIrCode(irCodeNumber);
+			sendOk();
+		}
+		/*
 		else if (instruction.startsWith(ModeKeyword))
 		{
 			String value = instruction.substring(ModeKeyword.length());

@@ -22,7 +22,7 @@ void configModeCallback(WiFiManager *myWiFiManager) {
 }
 
 MainApplication::MainApplication()
-	: _dht(DHTPIN, DHTTYPE), _httpServer(_dht)
+	: _dht(DHTPIN, DHTTYPE), _irManager(), _httpServer(_dht, _irManager)
 {
 	Serial.begin(115200);
 }
@@ -86,6 +86,8 @@ void MainApplication::setup(void)
 
   	_dht.begin();
 
+	_irManager.setup();
+
 	//install timer
 	_ticker.attach(1, tick);
 }
@@ -93,6 +95,9 @@ void MainApplication::setup(void)
 void MainApplication::handle(void)
 {
 	_httpServer.handle();
+	_irManager.handle();
+
+	//delay(100);
 }
 
 /**

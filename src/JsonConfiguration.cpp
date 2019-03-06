@@ -2,7 +2,6 @@
 // 
 // 
 #include <FS.h>
-#include <ArduinoJson.h>
 
 #include "JsonConfiguration.h"
 
@@ -38,8 +37,7 @@ void JsonConfiguration::setup(void)
 	// use configFile.readString instead.
 	configFile.readBytes(buf.get(), size);
 
-	StaticJsonBuffer<1000> jsonBuffer;
-	JsonObject& json = jsonBuffer.parseObject(buf.get());
+	JsonObject& json = _jsonBuffer.parseObject(buf.get());
 
 	if (!json.success()) 
 	{
@@ -61,11 +59,37 @@ void JsonConfiguration::setup(void)
 		restoreDefault();
 	}
 
+	//before parsing ircode we make correct initialization of the array
+	for (int i = 0; i < IRCODE_MAX_NUMBER; ++i)
+	{
+		_irCodes[i].size = 0;
+		_irCodes[i].data = NULL;
+	}
+
+	JsonObject& ircodes = json["irCodes"];
+
+	//obj.get<int>("low");
+	for (JsonPair& irCode : ircodes) {
+		int index = atoi(irCode.key);
+		JsonArray & array = irCode.value;
+		
+		_irCodes[index].data = (uint16_t *)malloc(sizeof(uint16_t) * array.size());
+		 
+		for (int j = 0; j < (int)array.size(); ++j) {
+			_irCodes[index].data[j] = array[j].as<int>();
+		}
+		_irCodes[index].size = array.size();
+	}
+
 	Serial.printf("hostname : %s\n", _hostname.c_str());
 	Serial.printf("ftpLogin : %s\n", _ftpLogin.c_str());
 	Serial.printf("ftpPasswd : %s\n", _ftpPasswd.c_str());
 	Serial.printf("nextRemoteOrderAt : %d\n", _nextRemoteOrderAt);
 	Serial.printf("_nextRemoteOrder : %s\n", _nextRemoteOrder.c_str());
+	String irCodesAsString;
+	//irCodesAsJson().printTo(irCodesAsString);
+	Serial.printf("irCodes : %s\n", irCodesAsString.c_str());
+
 }
 
 bool JsonConfiguration::saveConfig()
@@ -76,8 +100,25 @@ bool JsonConfiguration::saveConfig()
 	json["ftp.login"] = _ftpLogin;
 	json["ftp.passwd"] = _ftpPasswd;
 	json["nextRemoteOrderAt"] = _nextRemoteOrderAt;
-	json["nextRemoteOrder"] = _nextRemoteOrder;			 
-	
+	json["nextRemoteOrder"] = _nextRemoteOrder;	
+
+	//ir codes
+	JsonObject& irCodes = json.createNestedObject("irCodes");
+
+	for (int i = 0; i < IRCODE_MAX_NUMBER; ++i)
+	{
+		Serial.printf("Managing irCode[%d\n", i);
+		JsonArray& array = irCodes.createNestedArray(String(i));
+		for (int j = 0; j < _irCodes[i].size; ++j)
+		{
+			Serial.printf("add(%d\n", i);
+			array.add(_irCodes[i].data[j]);
+		}
+		String tmp;
+		array.printTo(tmp);
+		Serial.println(tmp);
+	}
+
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) 
 	{
@@ -86,7 +127,11 @@ bool JsonConfiguration::saveConfig()
 	}
 
 	json.printTo(configFile);
-	
+
+	String res;
+	json.printTo(res);
+	Serial.println(res.c_str());
+
 	return true;
 }
 
@@ -97,20 +142,87 @@ void JsonConfiguration::restoreDefault()
 	_ftpPasswd = "heater";
 	_nextRemoteOrderAt = 0;
 	_nextRemoteOrder = "";
-
 	saveConfig();
 	Serial.println("configuration restored.");
 }
 
-String JsonConfiguration::toJson()
-{
-	String response = "{\"hostname\":\"" + Configuration._hostname + "\", 					\
-	\"ftp-login\":\"" + Configuration._ftpLogin + "\",					\
-	\"ftp-passwd\":\"" + Configuration._ftpPasswd + "\",					\
-	\"next-remote-order-at\":\"" + Configuration._nextRemoteOrderAt + "\",					\
-	\"next-remote-order\":\"" + Configuration._nextRemoteOrder + "\"}";
-	return response;
+String uint16ToString(uint16_t input, uint8_t base) {
+   String result = "";
+   do {
+    char c = input % base;
+    input /= base;
+
+    if (c < 10)
+      c += '0';
+    else
+      c += 'A' - 10;
+    result = c + result;
+  } while (input);
+  return result;
 }
+
+void JsonConfiguration::setIrCode(const int irCodeNumber, const IrCode & irCode)
+{
+	if (_irCodes[irCodeNumber].data != NULL)
+	{
+		free(_irCodes[irCodeNumber].data);
+		_irCodes[irCodeNumber].data = NULL;
+		_irCodes[irCodeNumber].size = 0;
+	}
+
+	_irCodes[irCodeNumber].data = (uint16_t *)malloc(sizeof(uint16_t) * irCode.size);
+	memcpy(_irCodes[irCodeNumber].data, irCode.data, irCode.size * sizeof(uint16_t));
+	_irCodes[irCodeNumber].size = irCode.size;
+
+	Serial.printf("_irCodes[%d].size = %d", irCodeNumber, _irCodes[irCodeNumber].size);
+	Serial.println();
+
+	for (int i = 0; i < _irCodes[irCodeNumber].size; ++i)
+		Serial.printf("%d, ", _irCodes[irCodeNumber].data[i]);
+	Serial.println();
+}
+
+const IrCode & JsonConfiguration::getIrCode(const int irCodeNumber)
+{
+	return _irCodes[irCodeNumber];
+}
+
+// JsonObject& JsonConfiguration::irCodesAsJson()
+// {
+// 	JsonObject& irCodes = _jsonBuffer.createObject();
+
+// 	for (int i = 0; i < IRCODE_MAX_NUMBER; ++i)
+// 	{
+// 		Serial.printf("Managing irCode[%d\n", i);
+// 		JsonArray& array = irCodes.createNestedArray("irCodes");
+// 		for (int j = 0; j < _irCodes[i].size; ++j)
+// 		{
+// 			Serial.printf("add(%d\n", i);
+// 			array.add(_irCodes[i].data[j]);
+// 		}
+// 		String tmp;
+// 		array.printTo(tmp);
+// 		Serial.println(tmp);
+// 		irCodes[String(i)] = array;
+// 	}
+
+// 	String res;
+// 	irCodes.printTo(res);
+// 	Serial.println(res.c_str());
+// 	return irCodes;
+// }
+
+// String JsonConfiguration::toJson()
+// {
+// 	String response = "{\"hostname\":\"" + Configuration._hostname + "\", 					\
+// 	\"ftp-login\":\"" + Configuration._ftpLogin + "\",					\
+// 	\"ftp-passwd\":\"" + Configuration._ftpPasswd + "\",					\
+// 	\"next-remote-order-at\":\"" + Configuration._nextRemoteOrderAt + "\",					\
+// 	\"next-remote-order\":\"" + Configuration._nextRemoteOrder + "\",						\
+// 	\"irCodes\":\"" + irCodesAsJson() + "\"}";
+// 	Serial.println(response);
+// 	return response;
+// }
 
 #if !defined(NO_GLOBAL_INSTANCES) 
 JsonConfiguration Configuration;

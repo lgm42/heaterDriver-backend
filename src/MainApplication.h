@@ -14,6 +14,7 @@
 
 #include "HttpServer.h"
 #include "JsonConfiguration.h"
+#include "IRManager.h"
 
 #include "Arduino.h"
 
@@ -29,6 +30,7 @@ private:
 	Ticker _ticker;
 	WiFiManager _wifiManager;
 	DHT _dht;
+	IRManager _irManager;
 	HttpServer _httpServer;
 
 	bool runUpdate(Stream& in, uint32_t size, int command);

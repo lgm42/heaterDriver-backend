@@ -9,6 +9,12 @@
 	#include "WProgram.h"
 #endif
 
+#include <ArduinoJson.h>
+
+#include "types.h"
+
+#define IRCODE_MAX_NUMBER	10
+
 class JsonConfiguration 
 {
 public:
@@ -21,6 +27,8 @@ public:
 
 	void restoreDefault();
 
+	void setIrCode(const int IrCodeNumber, const IrCode & irCode);
+	const IrCode & getIrCode(const int IrCodeNumber);
 	String _hostname;
 	String _ftpLogin;
 	String _ftpPasswd;
@@ -28,9 +36,13 @@ public:
 	int _nextRemoteOrderAt;
 	String _nextRemoteOrder;
 
+	IrCode _irCodes[IRCODE_MAX_NUMBER];
+
 	String toJson();
 private:
+	JsonObject& irCodesAsJson();
 
+	StaticJsonBuffer<1000> _jsonBuffer;
 };
 
 #if !defined(NO_GLOBAL_INSTANCES)

@@ -11,11 +11,12 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266FtpServer.h>
 #include "DHT.h"
+#include "IRManager.h"
 
 class HttpServer
 {
   public:
-	  HttpServer(DHT & dht);
+	  HttpServer(DHT & dht, IRManager & ir);
 	  virtual ~HttpServer();
 
 	virtual void setup(void);
@@ -30,6 +31,7 @@ private:
 	WiFiUDP _ntpUDP;
 	NTPClient _timeClient;
 	DHT & _dht;
+	IRManager & _irManager;
 
 	bool handleFileRead(String path);
 
@@ -39,6 +41,8 @@ private:
 
 	static const String DataKeyword;
 	static const String RestKeyword;
+	static const String LearnIrKeyword;
+	static const String SendIrKeyword;
 
 };
 
