@@ -1,0 +1,50 @@
+body, html {
+	height: 100%;
+	background-color: black;
+}
+
+.bg { 
+    /* The image used */
+    background-image: url("background.png");
+
+    /* Full height */
+	height: 100%; 
+	width: 100%;
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+	background-size: cover;
+	max-width: initial !important;
+}
+
+.semi-transparent-container {
+	background: rgba(204, 204, 204, 0.5);
+	text-align: center;
+	padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.container {
+	text-align: center;
+}
+.title {
+	text-align: center;
+}
+
+#time {
+	margin-left: 10px;
+}
+
+.toast {
+	background-color: #FFCDD2 !important;
+}
+
+nav {
+	background-color: rgba(255, 255, 255, 0.17);
+	font-size: 30px;
+}
+
+.nextDriveOn {
+	margin-top: 50px;
+}
